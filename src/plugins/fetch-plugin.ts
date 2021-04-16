@@ -7,29 +7,39 @@ const fileCache = localforage.createInstance({
   name: "filecache",
 });
 
-const onLoadResult = async (args: any, inputCode: string): Promise<esbuild.OnLoadResult> => {
+const onLoadCashResult = async (args: any) => {
+  const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
 
-  if (args.path === "index.js")
-    return { loader: "jsx", contents: inputCode };
+  if (cachedResult) return cachedResult;
+}
 
-  // const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
-
-  // if (cachedResult) return cachedResult;
-
+const onLoadResult = async (args: any): Promise<esbuild.OnLoadResult> => {
   const { data, request } = await axios.get(args.path);
 
-  const fileType = args.path.match(/.css$/) ? 'css' : 'jsx';
+  const result: esbuild.OnLoadResult = {
+    loader: 'jsx',
+    contents: data,
+    resolveDir: new URL("./", request.responseURL).pathname,
+  };
+
+  await fileCache.setItem(args.path, result);
+
+  return result;
+}
+const onLoadIndex = (inputCode: string): esbuild.OnLoadResult => ({ loader: "jsx", contents: inputCode });
+
+const onLoadCssFiles = async (args: any) => {
+  const { data, request } = await axios.get(args.path);
 
   const escaped = data
     .replace(/\n/g, '')
     .replace(/"/g, '\\"')
     .replace(/'/g, "\\'");
 
-  const contents = fileType === 'css' ?
-    `const style = document.createElement('style');
-     style.innerText = '${escaped}';
-     document.head.appendChild(style)
-    `: data;
+  const contents = `const style = document.createElement('style');
+  style.innerText = '${escaped}';
+  document.head.appendChild(style)
+ `
 
 
   const result: esbuild.OnLoadResult = {
@@ -43,13 +53,21 @@ const onLoadResult = async (args: any, inputCode: string): Promise<esbuild.OnLoa
   return result;
 }
 
+
+
 export const fetchPlugin = (inputCode: string) => {
   return {
     name: 'fetch-plugin',
     setup(build: esbuild.PluginBuild) {
-      build.onLoad({ filter: /.*/ }, async (args: any) => {
-        return onLoadResult(args, inputCode)
-      });
+      build.onLoad({ filter: /(^index\.js$)/ }, () => onLoadIndex(inputCode));
+
+      build.onLoad({ filter: /.*/ }, (args: any) => {
+        return onLoadCashResult(args)
+      })
+
+      build.onLoad({ filter: /.css$/ }, onLoadCssFiles);
+
+      build.onLoad({ filter: /.*/ }, onLoadResult);
     }
   }
 }

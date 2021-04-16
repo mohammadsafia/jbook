@@ -27,7 +27,7 @@ const App: React.FC<AppProps> = () => {
       entryPoints: ["index.js"],
       bundle: true,
       write: false,
-      plugins: [unpkgPathPlugin()],
+      plugins: [unpkgPathPlugin(input)],
       define: {
         "process.evn.NODE_ENV": '"production"',
         global: "window",

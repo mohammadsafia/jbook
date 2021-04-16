@@ -6,37 +6,14 @@ const fileCache = localforage.createInstance({
   name: "filecache",
 });
 
-export const unpkgPathPlugin = () => {
-  return {
-    name: "unpkg-path-plugin",
-    setup(build: esbuild.PluginBuild) {
-      build.onResolve({ filter: /.*/ }, async (args: any) => {
-        return onResolveResult(args)
-      });
+const onLoadResult = async (args: any, contents: string): Promise<esbuild.OnLoadResult> => {
 
-      build.onLoad({ filter: /.*/ }, async (args: any) => {
-        return onLoadResult(args)
-      });
-    },
-  };
-};
+  if (args.path === "index.js")
+    return { loader: "jsx", contents };
 
-const onLoadResult = async (args: any): Promise<esbuild.OnLoadResult> => {
-  console.log("onLoad", args);
-
-  if (args.path === "index.js") {
-    return {
-      loader: "jsx",
-      contents: `
-        import React from 'react';
-      `,
-    };
-  }
   const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
 
-  if (cachedResult) {
-    return cachedResult;
-  }
+  if (cachedResult) return cachedResult;
 
   const { data, request } = await axios.get(args.path);
 
@@ -51,24 +28,41 @@ const onLoadResult = async (args: any): Promise<esbuild.OnLoadResult> => {
   return result;
 }
 
-const onResolveResult = async (args: any): Promise<esbuild.OnResolveResult> => {
-  console.log("onResolve", args);
-  if (args.path === "index.js") {
-    return { path: args.path, namespace: "a" };
-  }
 
-  if (args.path.includes("./") || args.path.includes("../")) {
-    return {
-      namespace: "a",
-      path: new URL(
-        args.path,
-        "https://unpkg.com" + args.resolveDir + "/"
-      ).href,
-    };
-  }
+const onResolveIndex = () => ({ path: 'index.js', namespace: 'a' })
 
+
+const onResolveNestedPath = async (args: any): Promise<esbuild.OnResolveResult> => ({
+  namespace: "a",
+  path: new URL(
+    args.path,
+    "https://unpkg.com" + args.resolveDir + "/"
+  ).href,
+})
+
+
+const onResolveResult = async (args: any): Promise<esbuild.OnResolveResult> => ({
+  namespace: "a",
+  path: `https://unpkg.com/${args.path}`,
+})
+
+export const unpkgPathPlugin = (inputCode: string) => {
   return {
-    namespace: "a",
-    path: `https://unpkg.com/${args.path}`,
+    name: "unpkg-path-plugin",
+    setup(build: esbuild.PluginBuild) {
+      // Handle root entry file of 'index.js'
+      build.onResolve({ filter: /(^index\.js$)/ }, onResolveIndex);
+
+      // Handle relative paths in a module
+      build.onResolve({ filter: /^\.+\// }, onResolveNestedPath)
+
+      // Handle main file of a module
+      build.onResolve({ filter: /.*/ }, onResolveResult);
+
+      build.onLoad({ filter: /.*/ }, async (args: any) => {
+        return onLoadResult(args, inputCode)
+      });
+    },
   };
-}
+};
+

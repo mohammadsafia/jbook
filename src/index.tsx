@@ -1,52 +1,60 @@
-import * as esbuild from 'esbuild-wasm';
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import * as esbuild from "esbuild-wasm";
+import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
+import { unpkgPathPlugin } from "./plugins/unpkg-path-plugin";
 
-interface AppProps {
-
-}
+interface AppProps { }
 const App: React.FC<AppProps> = () => {
-  const ref = useRef<esbuild.Service>()
-  const [input, setInput] = useState<string>('');
-  const [code, setCode] = useState<string>('');
-
-
+  const ref = useRef<esbuild.Service>();
+  const [input, setInput] = useState<string>("");
+  const [code, setCode] = useState<string>("");
 
   const startService = async () => {
     ref.current = await esbuild.startService({
       worker: true,
-      wasmURL: '/esbuild.wasm'
+      wasmURL: "/esbuild.wasm",
     });
-  }
+  };
 
   useEffect(() => {
-    startService()
-  }, [])
-
+    startService();
+  }, []);
 
   const onClick = async () => {
     if (!ref.current) return;
 
-    const result = await ref.current.transform(input, {
-      loader: 'jsx',
-      target: 'es2015'
-    })
+    const result = await ref.current.build({
+      entryPoints: ["index.js"],
+      bundle: true,
+      write: false,
+      plugins: [unpkgPathPlugin()],
+      define: {
+        "process.evn.NODE_ENV": '"production"',
+        global: "window",
+      },
+    });
 
-    setCode(result.code)
-  }
+    setCode(result.outputFiles[0].text);
+  };
 
-  return <div>
-    <textarea value={input}
-      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-      name="name" id="name" cols={30} rows={10}
-    ></textarea>
+  return (
     <div>
-      <button onClick={onClick}>Submit</button>
+      <textarea
+        value={input}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+          setInput(e.target.value)
+        }
+        name="name"
+        id="name"
+        cols={30}
+        rows={10}
+      ></textarea>
+      <div>
+        <button onClick={onClick}>Submit</button>
+      </div>
+      <pre>{code}</pre>
     </div>
-    <pre>
-      {code}
-    </pre>
-  </div>
+  );
 };
 
-ReactDOM.render(<App />, document.querySelector('#root'))
+ReactDOM.render(<App />, document.querySelector("#root"));

@@ -7,20 +7,34 @@ const fileCache = localforage.createInstance({
   name: "filecache",
 });
 
-const onLoadResult = async (args: any, contents: string): Promise<esbuild.OnLoadResult> => {
+const onLoadResult = async (args: any, inputCode: string): Promise<esbuild.OnLoadResult> => {
 
   if (args.path === "index.js")
-    return { loader: "jsx", contents };
+    return { loader: "jsx", contents: inputCode };
 
-  const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
+  // const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
 
-  if (cachedResult) return cachedResult;
+  // if (cachedResult) return cachedResult;
 
   const { data, request } = await axios.get(args.path);
 
+  const fileType = args.path.match(/.css$/) ? 'css' : 'jsx';
+
+  const escaped = data
+    .replace(/\n/g, '')
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'");
+
+  const contents = fileType === 'css' ?
+    `const style = document.createElement('style');
+     style.innerText = '${escaped}';
+     document.head.appendChild(style)
+    `: data;
+
+
   const result: esbuild.OnLoadResult = {
-    loader: "jsx",
-    contents: data,
+    loader: 'jsx',
+    contents,
     resolveDir: new URL("./", request.responseURL).pathname,
   };
 

@@ -47,7 +47,7 @@ const App: React.FC<AppProps> = () => {
         }
         name="name"
         id="name"
-        cols={30}
+        cols={100}
         rows={10}
       ></textarea>
       <div>

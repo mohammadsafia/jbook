@@ -13,11 +13,13 @@ interface CodeCellProps {
 const CodeCell: React.FC<CodeCellProps> = () => {
   const [code, setCode] = useState('')
   const [input, setInput] = useState('');
+  const [err, setErr] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(async () => {
       const output = await BaseBundler(input)
-      setCode(output);
+      setCode(output.code);
+      setErr(output.err);
     }, 1000);
     return () => {
       clearTimeout(timer);
@@ -30,10 +32,10 @@ const CodeCell: React.FC<CodeCellProps> = () => {
         <Resizable direction="horizontal">
           <CodeEditor
             onChange={value => setInput(value)}
-            initialValue={input}
+            initialValue="const a = 1"
           />
         </Resizable>
-        <Preview code={code} />
+        <Preview code={code} bundlingStatus={err} />
       </div>
     </Resizable>
   );

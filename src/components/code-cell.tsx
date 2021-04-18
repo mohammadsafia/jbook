@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BaseBundler from '../bundler'
 
 import CodeEditor from './code-editor';
@@ -14,10 +14,15 @@ const CodeCell: React.FC<CodeCellProps> = () => {
   const [code, setCode] = useState('')
   const [input, setInput] = useState('');
 
-  const onClick = async () => {
-    const output = await BaseBundler(input)
-    setCode(output);
-  }
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const output = await BaseBundler(input)
+      setCode(output);
+    }, 1000);
+    return () => {
+      clearTimeout(timer);
+    }
+  }, [input])
 
   return (
     <Resizable direction="vertical">

@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import BaseBundler from '../bundler'
+import BaseBundler from '../../bundler'
 
-import CodeEditor from './code-editor';
-import Preview from './preview';
-import Resizable from './resizable'
+import CodeEditor from '../code-editor/code-editor';
+import Preview from '../preview/preview';
+import Resizable from '../resizable/resizable'
 
 interface CodeCellProps {
 

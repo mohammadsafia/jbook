@@ -4,6 +4,10 @@
   background-repeat: no-repeat;
   background-position: 50%;
 }
+.resize-horizontal {
+  display: flex;
+  flex-direction: row;
+}
 
 .react-resizable-handle-s {
   height: 10px;

@@ -21,15 +21,13 @@ const CodeCell: React.FC<CodeCellProps> = () => {
 
   return (
     <Resizable direction="vertical">
-      <div>
-        <CodeEditor
-          onChange={value => setInput(value)}
-          initialValue={input}
-        />
-
-        <div>
-          <button onClick={onClick}>Submit</button>
-        </div>
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'row' }}>
+        <Resizable direction="horizontal">
+          <CodeEditor
+            onChange={value => setInput(value)}
+            initialValue={input}
+          />
+        </Resizable>
         <Preview code={code} />
       </div>
     </Resizable>

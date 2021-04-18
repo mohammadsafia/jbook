@@ -1,32 +1,14 @@
 
 import 'bulmaswatch/superhero/bulmaswatch.min.css';
 
-import { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import BaseBundler from './bundler'
-
-import CodeEditor from './components/code-editor';
-import Preview from './components/preview';
-
+import CodeCell from './components/code-cell'
 
 const App = () => {
-  const [code, setCode] = useState<string>('')
-  const [input, setInput] = useState('');
-
-  const onClick = async () => {
-    const output = await BaseBundler(input)
-    setCode(output);
-  }
-
   return (
     <div>
-      <CodeEditor onChange={(value: string) => setInput(value)} initialValue={input} />
-
-      <div>
-        <button onClick={onClick}>Submit</button>
-      </div>
-      <Preview code={code} />
+      <CodeCell />
     </div>
   );
 };

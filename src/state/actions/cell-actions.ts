@@ -1,12 +1,12 @@
 import { CellActionType } from '../action-types';
-import { CellTypes } from '../cell';
+import {  CellTypes } from '../cell';
 
-
+export type CellDirection = 'up' | 'down';
 export interface MoveCellAction {
   type: CellActionType.MOVE_CELL;
   payload: {
     id: string;
-    direction: 'up' | 'down';
+    direction: CellDirection;
   }
 }
 

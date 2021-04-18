@@ -28,7 +28,7 @@ const TextEditor: React.FC<TextEditorProps> = () => {
 
   if (editing) {
     return (
-      <div ref={ref}>
+      <div className="text-editor" ref={ref}>
         <MDEditor />
       </div>
     )
@@ -36,7 +36,7 @@ const TextEditor: React.FC<TextEditorProps> = () => {
 
 
   return (
-    <div onClick={() => setEditing(true)}>
+    <div className="text-editor" onClick={() => setEditing(true)}>
       <MDEditor.Markdown source={'# Header'} />
     </div>
   );

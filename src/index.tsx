@@ -4,7 +4,7 @@ import 'bulmaswatch/superhero/bulmaswatch.min.css';
 import { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import bundle from './bundler'
+import BaseBundler from './bundler'
 
 import CodeEditor from './components/code-editor';
 import Preview from './components/preview';
@@ -15,7 +15,7 @@ const App = () => {
   const [input, setInput] = useState('');
 
   const onClick = async () => {
-    const output = await bundle(input)
+    const output = await BaseBundler(input)
     setCode(output);
   }
 

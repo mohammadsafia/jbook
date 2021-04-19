@@ -56,7 +56,7 @@ const Preview: React.FC<PreviewProps> = ({ code, bundlingStatus }) => {
 
   return (
     <div className="preview-wrapper">
-      <iframe title="preview" ref={iframe} sandbox="allow-scripts" srcDoc={html} />
+      <iframe title="preview" ref={iframe} sandbox="allow-scripts allow-modals" srcDoc={html} />
       {bundlingStatus && <div className="preview-error">{bundlingStatus}</div>}
     </div>
   );

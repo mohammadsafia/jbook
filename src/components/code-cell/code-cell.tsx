@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import CodeEditor from '../code-editor/code-editor';
 import Preview from '../preview/preview';
 import Resizable from '../resizable/resizable';
-import { useTypedSelector } from './../../hooks/use-typed-selector';
+import { useTypedSelector, useCumulativeCode } from './../../hooks';
 interface CodeCellProps {
   cell: Cell
 }
@@ -14,22 +14,23 @@ const CodeCell: React.FC<CodeCellProps> = ({ cell }) => {
 
   const { updateCellAction, createBundleAction } = useActions();
   const bundle = useTypedSelector(({ bundles }) => bundles[cell.id]);
+  const cumulativeCode = useCumulativeCode(cell.id)
 
 
   useEffect(() => {
     if (!bundle) {
-      createBundleAction(cell.id, cell.content);
+      createBundleAction(cell.id, cumulativeCode);
       return;
     }
 
     const timer = setTimeout(async () => {
-      createBundleAction(cell.id, cell.content)
+      createBundleAction(cell.id, cumulativeCode)
     }, 1000);
     return () => {
       clearTimeout(timer);
     }
     // eslint-disable-next-line
-  }, [cell.content, cell.id, createBundleAction])
+  }, [cumulativeCode, cell.id, createBundleAction])
 
   return (
     <Resizable direction="vertical">
@@ -37,7 +38,7 @@ const CodeCell: React.FC<CodeCellProps> = ({ cell }) => {
         <Resizable direction="horizontal">
           <CodeEditor
             onChange={value => updateCellAction(cell.id, value)}
-            initialValue="const a = 1"
+            initialValue=""
           />
         </Resizable>
         {

@@ -4,7 +4,7 @@ import bundleReducer from './bundlesReducer';
 
 const reducers = combineReducers({
   cells: cellsReducer,
-  bundle: bundleReducer
+  bundles: bundleReducer
 })
 
 export default reducers;

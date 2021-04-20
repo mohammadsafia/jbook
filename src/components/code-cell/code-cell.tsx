@@ -1,3 +1,4 @@
+import './code-cell.css';
 import { Cell } from '../../state';
 import { useActions } from '../../hooks'
 import { useEffect } from 'react';
@@ -39,7 +40,17 @@ const CodeCell: React.FC<CodeCellProps> = ({ cell }) => {
             initialValue="const a = 1"
           />
         </Resizable>
-        {bundle && (<Preview code={bundle.code} bundlingStatus={bundle.err} />)}
+        {
+          !bundle || bundle.loading ?
+            <div className="progress-wrapper">
+              <div className="progress-cover">
+                <progress className="progress is-small is-primary">
+                  Loading
+                </progress>
+              </div>
+            </div>
+            : <Preview code={bundle.code} bundlingStatus={bundle.err} />
+        }
       </div>
     </Resizable>
   );
